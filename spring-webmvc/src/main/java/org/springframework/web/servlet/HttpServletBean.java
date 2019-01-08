@@ -46,6 +46,21 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
  * its config parameters ({@code init-param} entries within the
@@ -80,6 +95,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  */
 @SuppressWarnings("serial")
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
+	// COMMENT isen 主要做一些初始化的工作，将web.xml中配置的参数设置到Servlet中。比如servlet标签的子标签init-param标签中配置的参数。
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -148,13 +164,19 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
+		// COMMENT isen 从ServletConfig(包含web.xml中的Servlet的初始化参数)设置到ServletConfigPropertyValues中
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// COMMENT isen 构造BeanWrapper，用于访问this(HttpServletBean，即运行时的DispatcherServlet)的属性，
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+				// COMMENT isen 注册与Resource对应的属性编辑器propertyEditor
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
+				// COMMENT isen 设置DispatcherServlet属性
+				//例如 contextConfigLocation属性，该属性是在FrameworkServlet(DispatcherServlet父类)中定义，在web.xml中配置属性值，
+				// 所以通过BeanWrapper依赖注入DispatcherServlet中，用于构造SpringMVC容器上下文
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {
@@ -166,6 +188,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Let subclasses do whatever initialization they like.
+		// COMMENT isen FrameworkServlet覆盖该方法，创建this's WebApplicationContext
 		initServletBean();
 	}
 
@@ -234,8 +257,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 			if (!CollectionUtils.isEmpty(missingProps)) {
 				throw new ServletException(
 						"Initialization from ServletConfig for servlet '" + config.getServletName() +
-						"' failed; the following required properties were missing: " +
-						StringUtils.collectionToDelimitedString(missingProps, ", "));
+								"' failed; the following required properties were missing: " +
+								StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

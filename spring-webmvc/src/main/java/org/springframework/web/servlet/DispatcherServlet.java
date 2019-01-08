@@ -160,6 +160,7 @@ import org.springframework.web.util.WebUtils;
  */
 @SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
+	// COMMENT isen 初始化各个功能的实现类。比如异常处理、视图处理、请求映射处理等。
 
 	/** Well-known name for the MultipartResolver object in the bean factory for this namespace. */
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
@@ -491,6 +492,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void onRefresh(ApplicationContext context) {
+		// COMMENT isen 初始化各种策略接口的实现类，包括视图解析器、处理器映射器、处理器适配器等
 		initStrategies(context);
 	}
 
@@ -912,6 +914,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
 		Map<String, Object> attributesSnapshot = null;
+		// COMMENT isen 如果请求是include请求，保存一份request中attributes数据快照
+		// PROBLEM isen 2019/1/8 什么是include请求？
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();
 			Enumeration<?> attrNames = request.getAttributeNames();
@@ -924,6 +928,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Make framework objects available to handlers and view objects.
+		// COMMENT isen 设置一些属性用于处理器和视图对象
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
@@ -939,6 +944,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		try {
+			//首先根据请求的路径找到HandlerMethod(带有Method反射属性，也就是对应Controller中的方法)，
+			// 然后匹配路径对应的拦截器，有了HandlerMethod和拦截器构造个HandlerExecutionChain对象。
+			// HandlerExecutionChain对象的获取是通过HandlerMapping接口提供的方法中得到。
+			// 有了HandlerExecutionChain之后，通过HandlerAdapter对象进行处理得到ModelAndView对象，
+			// HandlerMethod内部handle的时候，使用各种HandlerMethodArgumentResolver实现类处理HandlerMethod的参数，
+			// 使用各种HandlerMethodReturnValueHandler实现类处理返回值。
+			// 最终返回值被处理成ModelAndView对象，这期间发生的异常会被HandlerExceptionResolver接口实现类进行处理。
+			// COMMENT isen doDispatch——DispatcherServlet进行请求分发的方法
 			doDispatch(request, response);
 		}
 		finally {
