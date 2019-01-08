@@ -160,7 +160,7 @@ import org.springframework.web.util.WebUtils;
  */
 @SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
-	// COMMENT isen 初始化各个功能的实现类。比如异常处理、视图处理、请求映射处理等。
+	// COMMENT isen 初始化9个组件。比如异常处理、视图处理、请求映射处理等。
 
 	/** Well-known name for the MultipartResolver object in the bean factory for this namespace. */
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
@@ -492,7 +492,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void onRefresh(ApplicationContext context) {
-		// COMMENT isen 初始化各种策略接口的实现类，包括视图解析器、处理器映射器、处理器适配器等
 		initStrategies(context);
 	}
 
@@ -501,6 +500,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
 	protected void initStrategies(ApplicationContext context) {
+		// COMMENT isen 2019/1/8 初始化九大组件，包括视图解析器、处理器映射器、处理器适配器等
 		initMultipartResolver(context);
 		initLocaleResolver(context);
 		initThemeResolver(context);
@@ -860,12 +860,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	@SuppressWarnings("unchecked")
 	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
 		String key = strategyInterface.getName();
+		// COMMENT isen 2019/1/8 获取所有的默认策略
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 			List<T> strategies = new ArrayList<>(classNames.length);
 			for (String className : classNames) {
 				try {
+					// COMMENT isen 2019/1/8 通过beanFactory创建默认策略bean
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);

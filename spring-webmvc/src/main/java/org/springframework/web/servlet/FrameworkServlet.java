@@ -140,7 +140,7 @@ import org.springframework.web.util.WebUtils;
  */
 @SuppressWarnings("serial")
 public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
-	// COMMENT isen 将Servlet与Spring容器上下文关联。其实也就是初始化FrameworkServlet的属性webApplicationContext，这个属性代表SpringMVC上下文，它有个父类上下文，既web.xml中配置的ContextLoaderListener监听器初始化的容器上下文。
+	// COMMENT isen 将Servlet与Spring容器上下文关联。即创建webApplicationContext(SpringMVC上下文)
 
 	/**
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
@@ -564,6 +564,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
 
+		//第一种方式
 		if (this.webApplicationContext != null) {
 			// COMMENT isen 当webApplicationContext是通过构造函数的参数传进来的时候，使用这段代码
 			// A context instance was injected at construction time -> use it
@@ -582,6 +583,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				}
 			}
 		}
+		//第二种方式
 		if (wac == null) {
 			// No context instance was injected at construction time -> see if one
 			// has been registered in the servlet context. If one exists, it is assumed
@@ -590,6 +592,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// COMMENT isen 从ServletContext中获取wac
 			wac = findWebApplicationContext();
 		}
+		//第三种方式(通常方法)
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one
 			// COMMENT isen 创建一个wac,以rootContext为父上下文，将ServletContext/ServletConfig等配置到这个上下文中
@@ -601,7 +604,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// support or the context injected at construction time had already been
 			// refreshed -> trigger initial onRefresh manually here.
 			synchronized (this.onRefreshMonitor) {
-				// COMMENT isen 模板方法，DispatcherServlet会覆盖该方法 
+				// COMMENT isen 模板方法，DispatcherServlet会覆盖该方法
 				onRefresh(wac);
 			}
 		}
@@ -663,11 +666,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 					"': custom WebApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurableWebApplicationContext");
 		}
+
+		// COMMENT isen 2019/1/8 创建WebApplicationContext
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
 		wac.setEnvironment(getEnvironment());
 		wac.setParent(parent);
+		// COMMENT isen 2019/1/8 将配置的contextConfigLocation设置传给wac
+		//默认的contextConfigLocation的是WEB-INF/[servlet-name]-Servlet.xml
 		String configLocation = getContextConfigLocation();
 		if (configLocation != null) {
 			wac.setConfigLocation(configLocation);
@@ -677,7 +684,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		return wac;
 	}
 
-	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
+	protected void  configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
 			// -> assign a more useful id based on available information
@@ -694,6 +701,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
+		// COMMENT isen 2019/1/8 给wac添加监听器ContextRefreshListener，用于监听ContextRefreshEvent事件
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
 		// The wac environment's #initPropertySources will be called in any case when the context
@@ -701,6 +709,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		// use in any post-processing or initialization that occurs below prior to #refresh
 		ConfigurableEnvironment env = wac.getEnvironment();
 		if (env instanceof ConfigurableWebEnvironment) {
+			// COMMENT isen 2019/1/8 初始化propertySources
 			((ConfigurableWebEnvironment) env).initPropertySources(getServletContext(), getServletConfig());
 		}
 
@@ -999,21 +1008,24 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		Throwable failureCause = null;
 		// PROBLEM isen 2019/1/8 为什么要保留当前线程的Local和requestAttributes?线程嵌套？
 
-		// COMMENT isen 获取与当前线程绑定的LocaleContext和RequestAttributes，并构建新的
+		// COMMENT isen 获取与当前线程绑定的LocaleContext和RequestAttributes，并构建新的(当前请求的)
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		// COMMENT isen 2019/1/8 localeContext用于存储本地信息Local
 		LocaleContext localeContext = buildLocaleContext(request);
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
+		// COMMENT isen 2019/1/8 requestAttributes用于管理request/session的attribute
 		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
 
+		// COMMENT isen 2019/1/8 获取异步处理管理并设置拦截器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
-		// COMMENT isen 让新的LocaleContext和RequestAttributes绑定到当前线程中(ThreadLocal)
+		// COMMENT isen 让当前请求的LocaleContext和RequestAttributes绑定到当前线程中(ThreadLocal)
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
-			// COMMENT isen DispatcherServlet实现
+			// COMMENT isen DispatcherServlet实现,实际处理请求入口
 			doService(request, response);
 		}
 		catch (ServletException | IOException ex) {
@@ -1198,6 +1210,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 
+		// COMMENT isen 2019/1/8 通过内部类暴露监听端点
 		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);

@@ -173,6 +173,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				// COMMENT isen 注册与Resource对应的属性编辑器propertyEditor
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
+				// COMMENT isen 2019/1/8 模板方法
 				initBeanWrapper(bw);
 				// COMMENT isen 设置DispatcherServlet属性
 				//例如 contextConfigLocation属性，该属性是在FrameworkServlet(DispatcherServlet父类)中定义，在web.xml中配置属性值，
