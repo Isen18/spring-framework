@@ -939,8 +939,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.flashMapManager != null) {
 			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
 			if (inputFlashMap != null) {
+				// COMMENT isen 2019/1/8 当前请求是转发(redirect)过来的，INPUT_FLASH_MAP_ATTRIBUTE用于保存上次请求中转发过来的属性
 				request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
 			}
+			// COMMENT isen 2019/1/8 OUTPUT_FLASH_MAP_ATTRIBUTE 用于保存本次请求需要转发的属性
 			request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 			request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 		}
@@ -1016,16 +1018,16 @@ public class DispatcherServlet extends FrameworkServlet {
 		boolean multipartRequestParsed = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-
 		try {
 			ModelAndView mv = null;
 			Exception dispatchException = null;
 
 			try {
+				// COMMENT isen 2019/1/8 如果是上传请求，就将request转为MultipartHttpServletRequest，使用了multipartResolver
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
-
 				// Determine handler for the current request.
+				// COMMENT isen 2019/1/8 根据request获取HandlerExecutionChain(包括拦截器和handler(目标方法))
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1033,9 +1035,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				// COMMENT isen 2019/1/8 根据handler获取HandlerAdapter
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
+				// COMMENT isen 2019/1/8 处理GET/HEAD的Last-modified
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
@@ -1045,18 +1049,23 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				// COMMENT isen 2019/1/8 执行interceptor的preHandle
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				// COMMENT isen 2019/1/8 HandlerAdapter使用handle处理请求
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
+					// COMMENT isen 2019/1/8 异步处理直接返回
 					return;
 				}
 
+				// COMMENT isen 2019/1/8 如果view为空时(handler返回void)，设置默认view。其中使用到了ViewNameTranslator
 				applyDefaultViewName(processedRequest, mv);
+				// COMMENT isen 2019/1/8 执行interceptor的postHandle
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1067,6 +1076,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			// COMMENT isen 2019/1/8 处理返回结果，包括处理异常、渲染页面、发出完成通知出发Interceptor的afterCompletion
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1080,12 +1090,14 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				// Instead of postHandle and afterCompletion
 				if (mappedHandler != null) {
+					// COMMENT isen 2019/1/8 异步处理
 					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
 				}
 			}
 			else {
 				// Clean up any resources used by a multipart request.
 				if (multipartRequestParsed) {
+					// COMMENT isen 2019/1/8 删除上传请求的资源
 					cleanupMultipart(processedRequest);
 				}
 			}
@@ -1121,6 +1133,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			else {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+				// COMMENT isen 2019/1/8 处理handler异常，用到HandlerExceptionResolver
 				mv = processHandlerException(request, response, handler, exception);
 				errorView = (mv != null);
 			}
@@ -1128,6 +1141,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Did the handler return a view to render?
 		if (mv != null && !mv.wasCleared()) {
+			// COMMENT isen 2019/1/8 渲染页面，渲染过程使用到了ThemeResolver
 			render(mv, request, response);
 			if (errorView) {
 				WebUtils.clearErrorRequestAttributes(request);
@@ -1141,10 +1155,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 			// Concurrent handling started during a forward
+			// COMMENT isen 2019/1/8 异步处理异常
 			return;
 		}
 
 		if (mappedHandler != null) {
+			// COMMENT isen 2019/1/8 触发interceptor的afterCompletion
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
 	}
@@ -1359,6 +1375,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		String viewName = mv.getViewName();
 		if (viewName != null) {
 			// We need to resolve the view name.
+			// COMMENT isen 2019/1/8 通过ViewResolver，根据viewName获取view
 			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
@@ -1367,6 +1384,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			// No need to lookup: the ModelAndView object contains the actual View object.
+			// COMMENT isen 2019/1/8 直接从mv中获取view
 			view = mv.getView();
 			if (view == null) {
 				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
@@ -1382,6 +1400,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (mv.getStatus() != null) {
 				response.setStatus(mv.getStatus().value());
 			}
+			// COMMENT isen 2019/1/8 对view进行渲染
 			view.render(mv.getModelInternal(), request, response);
 		}
 		catch (Exception ex) {

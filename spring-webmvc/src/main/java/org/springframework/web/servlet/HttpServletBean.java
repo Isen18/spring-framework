@@ -95,7 +95,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  */
 @SuppressWarnings("serial")
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
-	// COMMENT isen 主要做一些初始化的工作，将web.xml中配置的参数设置到Servlet中。比如servlet标签的子标签init-param标签中配置的参数。
+	// COMMENT isen 2019/1/8 主要做一些初始化的工作，将web.xml中配置的参数设置到Servlet中。比如servlet标签的子标签init-param标签中配置的参数。
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
