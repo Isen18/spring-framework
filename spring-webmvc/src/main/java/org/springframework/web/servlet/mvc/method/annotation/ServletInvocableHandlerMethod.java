@@ -98,8 +98,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+		// COMMENT isen 2019/1/9 调用父类执行请求
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+
+		// COMMENT isen 2019/1/9 处理@ResponseStatus
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
@@ -116,6 +118,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		mavContainer.setRequestHandled(false);
 		Assert.state(this.returnValueHandlers != null, "No return value handlers");
 		try {
+			// COMMENT isen 2019/1/9 处理返回值。包括将参数添加到Model；设置View；设置requestHandled为true
 			this.returnValueHandlers.handleReturnValue(
 					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}

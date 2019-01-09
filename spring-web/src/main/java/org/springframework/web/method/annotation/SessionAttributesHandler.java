@@ -86,26 +86,6 @@ public class SessionAttributesHandler {
 	}
 
 	/**
-	 * Whether the attribute name or type match the names and types specified
-	 * via {@code @SessionAttributes} on the underlying controller.
-	 * <p>Attributes successfully resolved through this method are "remembered"
-	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
-	 * {@link #cleanupAttributes(WebRequest)}.
-	 * @param attributeName the attribute name to check
-	 * @param attributeType the type for the attribute
-	 */
-	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
-		Assert.notNull(attributeName, "Attribute name must not be null");
-		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
-			this.knownAttributeNames.add(attributeName);
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	/**
 	 * Store a subset of the given attributes in the session. Attributes not
 	 * declared as session attributes via {@code @SessionAttributes} are ignored.
 	 * @param request the current request
@@ -146,6 +126,26 @@ public class SessionAttributesHandler {
 	public void cleanupAttributes(WebRequest request) {
 		for (String attributeName : this.knownAttributeNames) {
 			this.sessionAttributeStore.cleanupAttribute(request, attributeName);
+		}
+	}
+
+	/**
+	 * Whether the attribute name or type match the names and types specified
+	 * via {@code @SessionAttributes} on the underlying controller.
+	 * <p>Attributes successfully resolved through this method are "remembered"
+	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
+	 * {@link #cleanupAttributes(WebRequest)}.
+	 * @param attributeName the attribute name to check
+	 * @param attributeType the type for the attribute
+	 */
+	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
+		Assert.notNull(attributeName, "Attribute name must not be null");
+		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
+			this.knownAttributeNames.add(attributeName);
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

@@ -84,6 +84,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
 		Assert.state(ann != null, "No PathVariable annotation");
+		// COMMENT isen 2019/1/9 构建并返回带有参数名/默认值/是否是必须的info
 		return new PathVariableNamedValueInfo(ann);
 	}
 
@@ -91,6 +92,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		// COMMENT isen 2019/1/9 HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE属性是在HandlerMapping中根据lookupPath中设置的
 		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(
 				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (uriTemplateVars != null ? uriTemplateVars.get(name) : null);
@@ -105,7 +107,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(@Nullable Object arg, String name, MethodParameter parameter,
 			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest request) {
-
+		// COMMENT isen 2019/1/9 将解析出来的PathVariable设置到request中，方便以后使用
 		String key = View.PATH_VARIABLES;
 		int scope = RequestAttributes.SCOPE_REQUEST;
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(key, scope);

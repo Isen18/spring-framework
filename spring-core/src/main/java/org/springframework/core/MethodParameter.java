@@ -61,34 +61,45 @@ public class MethodParameter {
 
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
+	// COMMENT isen 2019/1/9 参数所属的方法
 	private final Executable executable;
 
+	// COMMENT isen 2019/1/9 参数序号
 	private final int parameterIndex;
 
+	// COMMENT isen 2019/1/9 参数
 	@Nullable
 	private volatile Parameter parameter;
 
+	// COMMENT isen 2019/1/9 参数嵌套级别
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index. */
+	// COMMENT isen 2019/1/9 保存每层嵌套参数的序数
 	@Nullable
 	Map<Integer, Integer> typeIndexesPerLevel;
 
+	// COMMENT isen 2019/1/9 容器类型，参数所属的方法所在的类
 	@Nullable
 	private volatile Class<?> containingClass;
 
+	// COMMENT isen 2019/1/9 参数类型
 	@Nullable
 	private volatile Class<?> parameterType;
 
+	// COMMENT isen 2019/1/9 Type型的参数类型
 	@Nullable
 	private volatile Type genericParameterType;
 
+	// COMMENT isen 2019/1/9 参数注解
 	@Nullable
 	private volatile Annotation[] parameterAnnotations;
 
+	// COMMENT isen 2019/1/9 参数名称查找器
 	@Nullable
 	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
 
+	// COMMENT isen 2019/1/9 参数名称
 	@Nullable
 	private volatile String parameterName;
 
@@ -610,12 +621,15 @@ public class MethodParameter {
 		if (discoverer != null) {
 			String[] parameterNames = null;
 			if (this.executable instanceof Method) {
+				// COMMENT isen 2019/1/9 获取方法的参数名
 				parameterNames = discoverer.getParameterNames((Method) this.executable);
 			}
 			else if (this.executable instanceof Constructor) {
+				// COMMENT isen 2019/1/9 则获取构造函数的参数名
 				parameterNames = discoverer.getParameterNames((Constructor<?>) this.executable);
 			}
 			if (parameterNames != null) {
+				// COMMENT isen 2019/1/9 获取指定为位置的参数名
 				this.parameterName = parameterNames[this.parameterIndex];
 			}
 			this.parameterNameDiscoverer = null;

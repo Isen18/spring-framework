@@ -120,7 +120,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 		Assert.state(mavContainer != null, "ModelAttributeMethodProcessor requires ModelAndViewContainer");
 		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
-
+		// COMMENT isen 2019/1/9 获取参数名
 		String name = ModelFactory.getNameForParameter(parameter);
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
 		if (ann != null) {
@@ -131,6 +131,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		BindingResult bindingResult = null;
 
 		if (mavContainer.containsAttribute(name)) {
+			// COMMENT isen 2019/1/9 从model中获取参数
 			attribute = mavContainer.getModel().get(name);
 		}
 		else {

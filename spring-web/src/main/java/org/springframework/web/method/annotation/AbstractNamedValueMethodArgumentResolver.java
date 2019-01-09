@@ -94,7 +94,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	@Nullable
 	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
-
+		// COMMENT isen 2019/1/9 获取参数的名值(默认值)信息
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
@@ -104,8 +104,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
 		}
 
+		// COMMENT isen 2019/1/9 解析参数。模板方法，子类实现
 		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest);
+
 		if (arg == null) {
+			// COMMENT isen 2019/1/9 没有解析到参数
 			if (namedValueInfo.defaultValue != null) {
 				arg = resolveStringValue(namedValueInfo.defaultValue);
 			}
@@ -119,6 +122,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (binderFactory != null) {
+			// COMMENT isen 2019/1/9 通过WebDataBinder创建binder并转化解析出的参数(如果需要转换)
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			try {
 				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
@@ -134,6 +138,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 		}
 
+		// COMMENT isen 2019/1/9 对解析出的参数进行后置处理
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);
 
 		return arg;
@@ -166,6 +171,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	private NamedValueInfo updateNamedValueInfo(MethodParameter parameter, NamedValueInfo info) {
 		String name = info.name;
 		if (info.name.isEmpty()) {
+			// COMMENT isen 2019/1/9 如果name为空，则获取参数名discoverer获取参数名
 			name = parameter.getParameterName();
 			if (name == null) {
 				throw new IllegalArgumentException(

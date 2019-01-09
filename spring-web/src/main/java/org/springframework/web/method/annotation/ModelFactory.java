@@ -106,12 +106,17 @@ public final class ModelFactory {
 	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
 			throws Exception {
 
+		// COMMENT isen 2019/1/9 从SessionAttributes中获取保存的参数，并合并到mavContainer中
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
 		container.mergeAttributes(sessionAttributes);
+
+		// COMMENT isen 2019/1/9 执行注释了@ModelAtrribute的方法并将结果设置到model
 		invokeModelAttributeMethods(request, container);
 
+		// COMMENT isen 2019/1/9 遍历注释了@ModelAtrribute又在@SessionAttributes中注释的参数
 		for (String name : findSessionAttributeArguments(handlerMethod)) {
 			if (!container.containsAttribute(name)) {
+				// COMMENT isen 2019/1/9 如果不存在，则从所有@SessionAttributes中获取
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
 					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'", name);
@@ -128,7 +133,9 @@ public final class ModelFactory {
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer container)
 			throws Exception {
 
+		// COMMENT isen 2019/1/9 遍历注释了@ModelAttribute的方法
 		while (!this.modelMethods.isEmpty()) {
+			// COMMENT isen 2019/1/9 获取注释了@ModelAttribute的方法
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
 			Assert.state(ann != null, "No ModelAttribute annotation");
@@ -136,11 +143,14 @@ public final class ModelFactory {
 				if (!ann.binding()) {
 					container.setBindingDisabled(ann.name());
 				}
+				// COMMENT isen 2019/1/9 已经在container中，跳过
 				continue;
 			}
 
+			// COMMENT isen 2019/1/9 执行@ModelAttribute注释的方法
 			Object returnValue = modelMethod.invokeForRequest(request, container);
 			if (!modelMethod.isVoid()){
+				// COMMENT isen 2019/1/9 获取参数名,并将其加入到model中
 				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
 				if (!ann.binding()) {
 					container.setBindingDisabled(returnValueName);
@@ -191,12 +201,14 @@ public final class ModelFactory {
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer container) throws Exception {
 		ModelMap defaultModel = container.getDefaultModel();
 		if (container.getSessionStatus().isComplete()){
+			// COMMENT isen 2019/1/9 如果会话结束
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
 			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
 		if (!container.isRequestHandled() && container.getModel() == defaultModel) {
+			// COMMENT isen 2019/1/9 如果需要渲染页面，需要设置BindingResult。即不是redirect或者@ResponseBdoy/返回HttpEntry情况
 			updateBindingResult(request, defaultModel);
 		}
 	}

@@ -49,8 +49,10 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  */
 public class ModelAndViewContainer {
 
+	// COMMENT isen 2019/1/9 true表示处理器返回redirect试图时，不使用defaultModel
 	private boolean ignoreDefaultModelOnRedirect = false;
 
+	// COMMENT isen 2019/1/9 视图，可以是实际视图，也可以是String类型
 	@Nullable
 	private Object view;
 
@@ -59,6 +61,7 @@ public class ModelAndViewContainer {
 	@Nullable
 	private ModelMap redirectModel;
 
+	// COMMENT isen 2019/1/9 处理器返回redirect视图标志
 	private boolean redirectModelScenario = false;
 
 	@Nullable
@@ -68,8 +71,10 @@ public class ModelAndViewContainer {
 
 	private final Set<String> bindingDisabled = new HashSet<>(4);
 
+	// COMMENT isen 2019/1/9 用于设置SessionAttribute使用完的标志
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
+	// COMMENT isen 2019/1/9 请求是否已经处理完的标志
 	private boolean requestHandled = false;
 
 

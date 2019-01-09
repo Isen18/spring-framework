@@ -71,6 +71,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		Class<?> declaringClass = originalMethod.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
+			// COMMENT isen 2019/1/9 asm根据调试信息获取参数名
 			map = inspectClass(declaringClass);
 			this.parameterNamesCache.put(declaringClass, map);
 		}
