@@ -103,6 +103,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 
 		Class<?> paramType = parameter.getParameterType();
 
+		// COMMENT isen 2019/1/9 直接返回Spring内置的WebRequest
 		// WebRequest / NativeWebRequest / ServletWebRequest
 		if (WebRequest.class.isAssignableFrom(paramType)) {
 			if (!paramType.isInstance(webRequest)) {
@@ -112,11 +113,13 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			return webRequest;
 		}
 
+		// COMMENT isen 2019/1/9 返回原生的request
 		// ServletRequest / HttpServletRequest / MultipartRequest / MultipartHttpServletRequest
 		if (ServletRequest.class.isAssignableFrom(paramType) || MultipartRequest.class.isAssignableFrom(paramType)) {
 			return resolveNativeRequest(webRequest, paramType);
 		}
 
+		// COMMENT isen 2019/1/9 返回与原生request相关的对象，例如session,stream等
 		// HttpServletRequest required for all further argument types
 		return resolveArgument(paramType, resolveNativeRequest(webRequest, HttpServletRequest.class));
 	}

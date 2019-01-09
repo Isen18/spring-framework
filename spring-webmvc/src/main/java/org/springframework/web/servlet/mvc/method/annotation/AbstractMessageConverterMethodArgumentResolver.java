@@ -175,6 +175,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 		if (contentType == null) {
 			noContentType = true;
+			// COMMENT isen 2019/1/9 如果没有contentType则设置默认-application/octet-stream
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 

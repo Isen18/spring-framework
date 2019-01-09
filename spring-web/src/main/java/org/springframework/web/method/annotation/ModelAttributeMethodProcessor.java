@@ -124,6 +124,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		String name = ModelFactory.getNameForParameter(parameter);
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
 		if (ann != null) {
+			// COMMENT isen 2019/1/9 如果使用了@ModelAttribute注解，则从mavContainer中获取
 			mavContainer.setBinding(name, ann.binding());
 		}
 
@@ -131,12 +132,13 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		BindingResult bindingResult = null;
 
 		if (mavContainer.containsAttribute(name)) {
-			// COMMENT isen 2019/1/9 从model中获取参数
+			// COMMENT isen 2019/1/9 从mavContainer中获取
 			attribute = mavContainer.getModel().get(name);
 		}
 		else {
 			// Create attribute instance
 			try {
+				// COMMENT isen 2019/1/9 创建参数实例，实际是调用子类ServletModelAttributeMethodProcessor.createAttribute
 				attribute = createAttribute(name, parameter, binderFactory, webRequest);
 			}
 			catch (BindException ex) {
@@ -158,8 +160,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 			if (binder.getTarget() != null) {
 				if (!mavContainer.isBindingDisabled(name)) {
+					// COMMENT isen 2019/1/9 进行对象的数据绑定
 					bindRequestParameters(binder, webRequest);
 				}
+
+				// COMMENT isen 2019/1/9 进行数据校验
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
 					throw new BindException(binder.getBindingResult());
@@ -173,6 +178,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		// Add resolved attribute and BindingResult at the end of the model
+		// COMMENT isen 2019/1/9 将BindingResult中model数据(参数实例+绑定结果)添加到mavContainer
 		Map<String, Object> bindingResultModel = bindingResult.getModel();
 		mavContainer.removeAttributes(bindingResultModel);
 		mavContainer.addAllAttributes(bindingResultModel);
@@ -206,6 +212,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 		Class<?> clazz = nestedParameter.getNestedParameterType();
 
+		// COMMENT isen 2019/1/9 获取参数的构造函数
 		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
 		if (ctor == null) {
 			Constructor<?>[] ctors = clazz.getConstructors();
@@ -222,6 +229,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
+		// COMMENT isen 2019/1/9 new出参数实例
 		Object attribute = constructAttribute(ctor, attributeName, parameter, binderFactory, webRequest);
 		if (parameter != nestedParameter) {
 			attribute = Optional.of(attribute);

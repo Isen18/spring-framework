@@ -161,6 +161,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 
 		if (servletRequest != null) {
+			// COMMENT isen 2019/1/9 用多组件解析器解析，如果request不是multi part request则返回 UNRESOLVABLE
 			Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
 			if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
 				return mpArg;
@@ -170,12 +171,15 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Object arg = null;
 		MultipartRequest multipartRequest = request.getNativeRequest(MultipartRequest.class);
 		if (multipartRequest != null) {
+			// PROBLEM isen 2019/1/9 为什么还要进行一次？
+			// COMMENT isen 2019/1/9 如果是multi part request，则获取name的file
 			List<MultipartFile> files = multipartRequest.getFiles(name);
 			if (!files.isEmpty()) {
 				arg = (files.size() == 1 ? files.get(0) : files);
 			}
 		}
 		if (arg == null) {
+			// COMMENT isen 2019/1/9 从request中获取paramterValues
 			String[] paramValues = request.getParameterValues(name);
 			if (paramValues != null) {
 				arg = (paramValues.length == 1 ? paramValues[0] : paramValues);

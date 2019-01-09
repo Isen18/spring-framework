@@ -71,7 +71,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	@Override
 	protected final Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
-
+		// COMMENT isen 2019/1/9 从request获取参数
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
 			Object attribute = createAttributeFromRequestValue(
@@ -81,6 +81,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 			}
 		}
 
+		// COMMENT isen 2019/1/9 没有获取到参数，调用父类方法
 		return super.createAttribute(attributeName, parameter, binderFactory, request);
 	}
 
