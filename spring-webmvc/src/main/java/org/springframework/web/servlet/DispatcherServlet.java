@@ -1076,7 +1076,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
-			// COMMENT isen 2019/1/8 处理返回结果，包括处理异常、渲染页面、发出完成通知出发Interceptor的afterCompletion
+			// COMMENT isen 2019/1/8 处理返回结果，包括处理异常、渲染页面、发出完成通知触发Interceptor的afterCompletion
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
