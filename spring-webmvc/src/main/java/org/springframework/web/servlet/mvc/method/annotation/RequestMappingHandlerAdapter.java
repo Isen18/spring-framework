@@ -112,7 +112,7 @@ import org.springframework.web.util.WebUtils;
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
  */
-public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
+public class  RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
 
 	/**
@@ -559,10 +559,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBody advice beans
-		// COMMENT isen 2019/1/9 初始化注释了@ControllerAdvice的类相关缓存
+		// COMMENT isen 2019/1/9 初始化注释了@ControllerAdvice的类相关缓存,包括@ModelAttribute、@InitBinder、ResponseBodyAdvice
 		initControllerAdviceCache();
 
-		// COMMENT isen 2019/1/9 argumentResolvers给处理器方法和注释了@ModelAttribute的方法设置参数
+		// COMMENT isen 2019/1/9 argumentResolvers用于给处理器方法和注释了@ModelAttribute的方法设置参数
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
@@ -926,7 +926,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				return null;
 			}
 
-			// COMMENT isen 2019/1/9 获取modelAndView
+			// COMMENT isen 2019/1/9 获取modelAndView，并进行请求的后置处理，包括model更新，flashMap设置
 			return getModelAndView(mavContainer, modelFactory, webRequest);
 		}
 		finally {

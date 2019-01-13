@@ -89,11 +89,13 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	@Override
 	@Nullable
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
+		// COMMENT isen 2019/1/13 检索出当前回话的所有flashMap
 		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(allFlashMaps)) {
 			return null;
 		}
 
+		// COMMENT isen 2019/1/13 获取过期和当期request的flashMap，将其删除
 		List<FlashMap> mapsToRemove = getExpiredFlashMaps(allFlashMaps);
 		FlashMap match = getMatchingFlashMap(allFlashMaps, request);
 		if (match != null) {
@@ -117,6 +119,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 			}
 		}
 
+		// COMMENT isen 2019/1/13 返回当期request的flashMap
 		return match;
 	}
 
@@ -142,9 +145,13 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		List<FlashMap> result = new LinkedList<>();
 		for (FlashMap flashMap : allMaps) {
 			if (isFlashMapForRequest(flashMap, request)) {
+				// COMMENT isen 2019/1/13 如果request的地址匹配flashMap
 				result.add(flashMap);
 			}
 		}
+
+		// COMMENT isen 2019/1/13 对所有flashMap进行排序，返回第一个。
+		// 因为一个目标地址可能从不同路径跳转过来，那么就有多个flashMap
 		if (!result.isEmpty()) {
 			Collections.sort(result);
 			if (logger.isTraceEnabled()) {
