@@ -893,7 +893,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 			// COMMENT isen 2019/1/9 创建传递参数的ModelAndViewContainer，用于保存model和view
 			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-			// COMMENT isen 2019/1/9 将falshMap中的数据设置到model
+			// COMMENT isen 2019/1/9 将flashMap中的数据设置到model
 			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 			// COMMENT isen 2019/1/9 通过modelFactory将sessionAttribute和@ModelAtrribute方法参数设置到model
 			modelFactory.initModel(webRequest, mavContainer, invocableMethod);

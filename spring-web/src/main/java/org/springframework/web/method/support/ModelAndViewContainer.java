@@ -56,8 +56,10 @@ public class ModelAndViewContainer {
 	@Nullable
 	private Object view;
 
+	// COMMENT isen 2019/1/11 默认model
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
+	// COMMENT isen 2019/1/11 redirect类型model
 	@Nullable
 	private ModelMap redirectModel;
 
