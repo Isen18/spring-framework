@@ -189,6 +189,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		// COMMENT isen 2019/1/9 获取相应的converter
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
+			// COMMENT isen 2019/1/14 使用converter转换
 			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
 			return handleResult(sourceType, targetType, result);
 		}

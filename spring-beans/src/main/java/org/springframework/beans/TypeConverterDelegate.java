@@ -189,8 +189,10 @@ class TypeConverterDelegate {
 				}
 			}
 			if (editor == null) {
+				// COMMENT isen 2019/1/14 查找默认的propertyEditor
 				editor = findDefaultEditor(requiredType);
 			}
+			// COMMENT isen 2019/1/14 使用默认的propertyEditor进行转换
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
 
