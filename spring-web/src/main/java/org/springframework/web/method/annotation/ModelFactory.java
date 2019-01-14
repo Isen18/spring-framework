@@ -205,6 +205,7 @@ public final class ModelFactory {
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
+			// COMMENT isen 2019/1/13 将defaultModel中@SessionAttribute参数保存起来(即更新)
 			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
 		if (!container.isRequestHandled() && container.getModel() == defaultModel) {

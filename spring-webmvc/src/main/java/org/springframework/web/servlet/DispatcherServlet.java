@@ -917,7 +917,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		// to be able to restore the original attributes after the include.
 		Map<String, Object> attributesSnapshot = null;
 		// COMMENT isen 如果请求是include请求，保存一份request中attributes数据快照
-		// PROBLEM isen 2019/1/8 什么是include请求？
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();
 			Enumeration<?> attrNames = request.getAttributeNames();
@@ -937,6 +936,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
 		if (this.flashMapManager != null) {
+			// COMMENT isen 2019/1/13 获取并删除当前request的flashMap
 			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
 			if (inputFlashMap != null) {
 				// COMMENT isen 2019/1/8 当前请求是转发(redirect)过来的，INPUT_FLASH_MAP_ATTRIBUTE用于保存上次请求中转发过来的属性
