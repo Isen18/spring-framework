@@ -77,8 +77,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	// COMMENT isen 2019/1/15 配置的springmvc拦截器，只用于配置，会被加到adaptedInterceptors。
+	//可以在HandlerMapping配置的时候注入，也可以通过子类的extendInterceptors钩子方法进行设置
 	private final List<Object> interceptors = new ArrayList<>();
 
+	// COMMENT isen 2019/1/15 拦截器，在getHandler中会添加到返回值HandlerExecutionChain中
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	private CorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
@@ -289,8 +292,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Override
 	protected void initApplicationContext() throws BeansException {
+		// COMMENT isen 2019/1/15 在初始化时，会被调用。initApplicationContext属于模板方法
+
+		// COMMENT isen 2019/1/15 模板方法，给子类修改interceptors的入口。目前没有使用。
 		extendInterceptors(this.interceptors);
+		// COMMENT isen 2019/1/15 将springmvc容器及其父容器中的所有MappedInterceptor类型的bean加入到adaptedInterceptors
 		detectMappedInterceptors(this.adaptedInterceptors);
+		// COMMENT isen 2019/1/15 将interceptors加到adaptedInterceptors
 		initInterceptors();
 	}
 
@@ -398,19 +406,24 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// COMMENT isen 2019/1/15 模板方法，子类实现
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
+			// COMMENT isen 2019/1/15 没有找到handler，使用默认的handler
 			handler = getDefaultHandler();
 		}
 		if (handler == null) {
 			return null;
 		}
+
+		// COMMENT isen 2019/1/15 如果handler是String类型，则从SpringMVC容器中查找
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		// COMMENT isen 2019/1/15 获取执行链
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -476,6 +489,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
+				// COMMENT isen 2019/1/15 如果是mappedInterceptor，则只有成功匹配url才加入到chain
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());

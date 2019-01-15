@@ -53,6 +53,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
 
+	// COMMENT isen 2019/1/15 用于处理"/"请求
 	@Nullable
 	private Object rootHandler;
 
@@ -60,6 +61,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	private boolean lazyInitHandlers = false;
 
+	// COMMENT isen 2019/1/15 url->Handler映射
 	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
 
 
@@ -119,6 +121,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		// COMMENT isen 2019/1/15 获取请求路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
@@ -137,6 +140,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 					String handlerName = (String) rawHandler;
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
+				// COMMENT isen 2019/1/15 模板方法，暂时为空方法
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
@@ -160,6 +164,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
 		// Direct match?
+		// COMMENT isen 2019/1/15 直接全匹配
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			// Bean name or resolved handler?
@@ -172,18 +177,21 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 
 		// Pattern match?
+		// COMMENT isen 2019/1/15 patter匹配
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
 			}
 			else if (useTrailingSlashMatch()) {
+				// COMMENT isen 2019/1/15 末尾加"/"进行匹配
 				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
 					matchingPatterns.add(registeredPattern +"/");
 				}
 			}
 		}
 
+		// COMMENT isen 2019/1/15 对所有匹配到的进行排序，选择最优的匹配
 		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
@@ -214,9 +222,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
+			// COMMENT isen 2019/1/15 通过sort拿到的最优匹配可能有多个
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
+					// COMMENT isen 2019/1/15 url模板参数
+					// PROBLEM isen 2019/1/15 理解
 					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
@@ -229,6 +240,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 
 		// No handler found...
+		// COMMENT isen 2019/1/15 没有找到匹配的handler
 		return null;
 	}
 
@@ -256,7 +268,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 */
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
 			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
-
+		// COMMENT isen 2019/1/15 增加两个内部的拦截器，两个拦截器作用是将与当前url匹配的pattern、匹配条件以及url模板参数设置到request，供后面使用
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
@@ -312,6 +324,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 */
 	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
+		// COMMENT isen 2019/1/15 注册handler
 		for (String urlPath : urlPaths) {
 			registerHandler(urlPath, beanName);
 		}
@@ -338,7 +351,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
-
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
