@@ -304,12 +304,15 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
+		// COMMENT isen 2019/1/15 创建url，默认会将model中的数据拼接到url后面
 		String targetUrl = createTargetUrl(model, request);
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
 
+		// COMMENT isen 2019/1/15 保存flashMap到session
 		// Save flash attributes
 		RequestContextUtils.saveOutputFlashMap(targetUrl, request, response);
 
+		// COMMENT isen 2019/1/15 redirect，会设置302状态码和Location
 		// Redirect
 		sendRedirect(request, response, targetUrl, this.http10Compatible);
 	}

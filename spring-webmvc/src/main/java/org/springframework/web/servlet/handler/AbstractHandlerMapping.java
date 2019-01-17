@@ -78,7 +78,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	// COMMENT isen 2019/1/15 配置的springmvc拦截器，只用于配置，会被加到adaptedInterceptors。
-	//可以在HandlerMapping配置的时候注入，也可以通过子类的extendInterceptors钩子方法进行设置
+	//可以在HandlerMapping配置，也可以通过子类的extendInterceptors钩子方法进行设置
 	private final List<Object> interceptors = new ArrayList<>();
 
 	// COMMENT isen 2019/1/15 拦截器，在getHandler中会添加到返回值HandlerExecutionChain中
@@ -409,21 +409,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		// COMMENT isen 2019/1/15 模板方法，子类实现
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
-			// COMMENT isen 2019/1/15 没有找到handler，使用默认的handler
+			// COMMENT isen 2019/1/15 没有找到handler，使用默认的handler，可以配置
 			handler = getDefaultHandler();
 		}
 		if (handler == null) {
 			return null;
 		}
 
-		// COMMENT isen 2019/1/15 如果handler是String类型，则从SpringMVC容器中查找
+		// COMMENT isen 2019/1/15 如果handler是String类型，则从SpringMVC容器中查找对应的bean
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
-		// COMMENT isen 2019/1/15 获取执行链
+		// COMMENT isen 2019/1/15 根据handler和request获取HandlerInterceptor，并创建HandlerExecutionChain
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -434,6 +434,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		if (CorsUtils.isCorsRequest(request)) {
+			// COMMENT isen 如果是CORS(Cross-Origin Resource Sharing)，增加相应的cors interceptor
 			CorsConfiguration globalConfig = this.corsConfigurationSource.getCorsConfiguration(request);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
 			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);

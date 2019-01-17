@@ -74,6 +74,7 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 		return this.order;
 	}
 
+	// COMMENT isen 视图解析器初始化工作
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		for (ViewResolver viewResolver : this.viewResolvers) {
@@ -104,6 +105,7 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	@Override
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
+		// COMMENT isen 遍历所有视图解析器进行解析
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {

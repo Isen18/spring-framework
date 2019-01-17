@@ -217,10 +217,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		// COMMENT isen 创建方法的匹配条件
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
+			// COMMENT isen 创建类的匹配条件
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
+				// COMMENT isen 将类的匹配条件和方法的匹配条件结合
 				info = typeInfo.combine(info);
 			}
 			String prefix = getPathPrefix(handlerType);

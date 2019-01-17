@@ -467,12 +467,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		// If this resolver is not supposed to handle the given view,
 		// return null to pass on to the next resolver in the chain.
 		if (!canHandle(viewName, locale)) {
+			// COMMENT isen 如果不支持，就返回null，让其他解析器进行解析
 			return null;
 		}
 
 		// Check for special "redirect:" prefix.
+		// COMMENT isen 检查是不是redirect视图
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+			// COMMENT isen 创建redirect视图
 			RedirectView view = new RedirectView(redirectUrl,
 					isRedirectContextRelative(), isRedirectHttp10Compatible());
 			String[] hosts = getRedirectHosts();
@@ -483,13 +486,16 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		}
 
 		// Check for special "forward:" prefix.
+		// COMMENT isen 检查是不是forward视图
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
 			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+			// COMMENT isen 创建InternalResourceView
 			InternalResourceView view = new InternalResourceView(forwardUrl);
 			return applyLifecycleMethods(FORWARD_URL_PREFIX, view);
 		}
 
 		// Else fall back to superclass implementation: calling loadView.
+		// COMMENT isen 其余让父类创建
 		return super.createView(viewName, locale);
 	}
 
@@ -525,8 +531,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 */
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
+		// COMMENT isen 创建view
 		AbstractUrlBasedView view = buildView(viewName);
+		// COMMENT isen 对view进行初始化
 		View result = applyLifecycleMethods(viewName, view);
+		// COMMENT isen 检查view对应的模板是否存在，如果存在，则将初始化后的view返回
 		return (view.checkResource(locale) ? result : null);
 	}
 
@@ -545,12 +554,14 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+		// COMMENT isen 获取viewClass并实例化出view
 		Class<?> viewClass = getViewClass();
 		Assert.state(viewClass != null, "No view class");
 
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
 		view.setUrl(getPrefix() + viewName + getSuffix());
 
+		// COMMENT isen 获取并设置contentType
 		String contentType = getContentType();
 		if (contentType != null) {
 			view.setContentType(contentType);
@@ -561,14 +572,17 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 		Boolean exposePathVariables = getExposePathVariables();
 		if (exposePathVariables != null) {
+			// COMMENT isen exposeContextBeansAsAttributes=true，表示view可以使用@PathVariables注解参数
 			view.setExposePathVariables(exposePathVariables);
 		}
 		Boolean exposeContextBeansAsAttributes = getExposeContextBeansAsAttributes();
 		if (exposeContextBeansAsAttributes != null) {
+			// COMMENT isen exposeContextBeansAsAttributes=true，表示view可以使用spring中的bean
 			view.setExposeContextBeansAsAttributes(exposeContextBeansAsAttributes);
 		}
 		String[] exposedContextBeanNames = getExposedContextBeanNames();
 		if (exposedContextBeanNames != null) {
+			// COMMENT isen view可以使用spring中的bean
 			view.setExposedContextBeanNames(exposedContextBeanNames);
 		}
 

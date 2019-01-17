@@ -311,8 +311,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 					(this.staticAttributes.isEmpty() ? "" : ", static attributes " + this.staticAttributes));
 		}
 
+		// COMMENT isen 2019/1/15 将静态 attribute和动态 attribute(优先)合并
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 		prepareResponse(request, response);
+		// COMMENT isen 2019/1/15 会将model数据当做request attribute，然后渲染view
 		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
 	}
 

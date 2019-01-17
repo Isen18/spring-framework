@@ -125,6 +125,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 				if (handler instanceof String) {
 					handler = ((String) handler).trim();
 				}
+				// COMMENT isen 通过父类方法进行注册
 				registerHandler(url, handler);
 			});
 			if (logger.isDebugEnabled()) {

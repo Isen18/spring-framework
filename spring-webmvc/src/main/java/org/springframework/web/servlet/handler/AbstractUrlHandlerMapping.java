@@ -121,12 +121,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
-		// COMMENT isen 2019/1/15 获取请求路径
+		// COMMENT isen 获取请求路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		// COMMENT isen 根据lookupPath查找handler
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
+			// COMMENT isen 没有找到handler，用rootHandler或者defaultHandler代替
 			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
 				rawHandler = getRootHandler();
@@ -136,11 +138,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 			if (rawHandler != null) {
 				// Bean name or resolved handler?
+				// COMMENT isen 如果handler是String,则获取具体的bean
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
-				// COMMENT isen 2019/1/15 模板方法，暂时为空方法
+				// COMMENT isen 验证找到的bean，是模板方法，暂时没有用
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
@@ -177,10 +180,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 
 		// Pattern match?
-		// COMMENT isen 2019/1/15 patter匹配
+		// COMMENT isen 2019/1/15 patter匹配，例如/t*->/test
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
+				// COMMENT isen 将匹配到的pattern加入到matchingPatterns
 				matchingPatterns.add(registeredPattern);
 			}
 			else if (useTrailingSlashMatch()) {
@@ -195,6 +199,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
+			// COMMENT isen 排序
 			matchingPatterns.sort(patternComparator);
 			if (logger.isTraceEnabled() && matchingPatterns.size() > 1) {
 				logger.trace("Matching patterns " + matchingPatterns);
@@ -202,6 +207,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			bestMatch = matchingPatterns.get(0);
 		}
 		if (bestMatch != null) {
+			// COMMENT isen 获取到最匹配的handler
 			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
 				if (bestMatch.endsWith("/")) {
@@ -218,17 +224,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
+			// COMMENT isen 例如，如果bestMatch=myroot/*.html, urlPath=myroot/myfile.html，则返回myfile.html
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
-			// COMMENT isen 2019/1/15 通过sort拿到的最优匹配可能有多个
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
-					// COMMENT isen 2019/1/15 url模板参数
-					// PROBLEM isen 2019/1/15 理解
+					// COMMENT isen 存在多个最优匹配
+					// COMMENT isen 提取uri模板参数，例如matchingPattern=/hotels/{hotel}, urlPath=/hotels/1，则返回hotel->1.
 					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
+					// COMMENT isen 如果vars还没有解码，则进行解码
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
 				}
@@ -351,14 +358,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
+
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
+				// COMMENT isen 同样的urlPath，存在不同的handler,抛异常
 				throw new IllegalStateException(
 						"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
 						"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
 			}
 		}
+		// COMMENT isen 没有找到handler，依据不同情况注册rootHandler和defaultHandler
 		else {
 			if (urlPath.equals("/")) {
 				if (logger.isTraceEnabled()) {

@@ -63,6 +63,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	public InternalResourceViewResolver() {
 		Class<?> viewClass = requiredViewClass();
 		if (InternalResourceView.class == viewClass && jstlPresent) {
+			// COMMENT isen 如果存在jstl，则将viewClass改为JstlView，从而支持jstl
 			viewClass = JstlView.class;
 		}
 		setViewClass(viewClass);
