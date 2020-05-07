@@ -258,6 +258,7 @@ public class ContextLoader {
 	 * @see #CONFIG_LOCATION_PARAM
 	 */
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) {
+		// COMMENT isen 如果在servletContext中存在根上下文，则抛异常
 		if (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null) {
 			throw new IllegalStateException(
 					"Cannot initialize context because there is already a root application context present - " +
@@ -275,6 +276,7 @@ public class ContextLoader {
 			// Store context in local instance variable, to guarantee that
 			// it is available on ServletContext shutdown.
 			if (this.context == null) {
+				// COMMENT isen 创建根上下文
 				this.context = createWebApplicationContext(servletContext);
 			}
 			if (this.context instanceof ConfigurableWebApplicationContext) {
@@ -285,12 +287,15 @@ public class ContextLoader {
 					if (cwac.getParent() == null) {
 						// The context instance was injected without an explicit parent ->
 						// determine parent for root web application context, if any.
+						// COMMENT isen 设置根上下文的双亲上下文，默认是null
 						ApplicationContext parent = loadParentContext(servletContext);
 						cwac.setParent(parent);
 					}
+					// COMMENT isen 配置和初始化IOC容器(根上下文)
 					configureAndRefreshWebApplicationContext(cwac, servletContext);
 				}
 			}
+			// COMMENT isen 将根上下文设置到servletContext中
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
 			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
@@ -328,6 +333,7 @@ public class ContextLoader {
 	 * @see ConfigurableWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(ServletContext sc) {
+		// COMMENT isen 获取WebApplicationContext具体子类，默认是XmlWebApplicationContext
 		Class<?> contextClass = determineContextClass(sc);
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
@@ -347,16 +353,16 @@ public class ContextLoader {
 	protected Class<?> determineContextClass(ServletContext servletContext) {
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		if (contextClassName != null) {
-			try {
-				return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
+				try {
+					return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
+				}
+				catch (ClassNotFoundException ex) {
+					throw new ApplicationContextException(
+							"Failed to load custom context class [" + contextClassName + "]", ex);
+				}
 			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Failed to load custom context class [" + contextClassName + "]", ex);
-			}
-		}
 		else {
-			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
+				contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
 				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
 			}
@@ -368,6 +374,7 @@ public class ContextLoader {
 	}
 
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac, ServletContext sc) {
+		// COMMENT isen 给wac设置contextId
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
 			// -> assign a more useful id based on available information
@@ -382,7 +389,9 @@ public class ContextLoader {
 			}
 		}
 
+		// COMMENT isen 给wac设置ServletContext
 		wac.setServletContext(sc);
+		// COMMENT isen 设置application的bean文件路径
 		String configLocationParam = sc.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (configLocationParam != null) {
 			wac.setConfigLocation(configLocationParam);
@@ -397,6 +406,7 @@ public class ContextLoader {
 		}
 
 		customizeContext(sc, wac);
+		// COMMENT isen 刷新IOC容器，初始化容器，加载bean定义等
 		wac.refresh();
 	}
 

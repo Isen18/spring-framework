@@ -139,6 +139,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 		super(parent);
 		setConfigLocations(configLocations);
 		if (refresh) {
+			// COMMENT isen 初始化容器
 			refresh();
 		}
 	}

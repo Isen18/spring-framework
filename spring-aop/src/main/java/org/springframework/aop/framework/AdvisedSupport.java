@@ -125,6 +125,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #setTargetSource
 	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
+	// COMMENT isen 此处将目标对象注入
 	public void setTarget(Object target) {
 		setTargetSource(new SingletonTargetSource(target));
 	}

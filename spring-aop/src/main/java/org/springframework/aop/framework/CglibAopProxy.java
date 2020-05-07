@@ -178,6 +178,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			validateClassIfNecessary(proxySuperClass, classLoader);
 
 			// Configure CGLIB Enhancer...
+			// COMMENT isen 创建enhancer
 			Enhancer enhancer = createEnhancer();
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
@@ -202,6 +203,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setCallbackTypes(types);
 
 			// Generate the proxy class and create a proxy instance.
+			// COMMENT isen 生产代理对象
 			return createProxyClassAndInstance(enhancer, callbacks);
 		}
 		catch (CodeGenerationException | IllegalArgumentException ex) {
@@ -658,6 +660,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+			// COMMENT isen 与ReflectiveMethodInvocation的invoke类似
 			Object oldProxy = null;
 			boolean setProxyContext = false;
 			Object target = null;
@@ -671,6 +674,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				// Get as late as possible to minimize the time we "own" the target, in case it comes from a pool...
 				target = targetSource.getTarget();
 				Class<?> targetClass = (target != null ? target.getClass() : null);
+				// COMMENT isen 获取设置好的AOP通知
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
@@ -681,10 +685,12 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// it does nothing but a reflective operation on the target, and no hot
 					// swapping or fancy proxying.
 					Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+					// COMMENT isen 没有拦截器链，直接调用目标对象的方法
 					retVal = methodProxy.invoke(target, argsToUse);
 				}
 				else {
 					// We need to create a method invocation...
+					// COMMENT isen 调用带有切面增强的方法
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
 				retVal = processReturnType(proxy, target, method, retVal);

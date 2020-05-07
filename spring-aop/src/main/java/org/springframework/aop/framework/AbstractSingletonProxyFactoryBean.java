@@ -139,6 +139,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	@Override
 	public void afterPropertiesSet() {
+		// COMMENT isen 必须配置target属性，并且target是一个bean reference
 		if (this.target == null) {
 			throw new IllegalArgumentException("Property 'target' is required");
 		}
@@ -149,6 +150,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 			this.proxyClassLoader = ClassUtils.getDefaultClassLoader();
 		}
 
+		// COMMENT isen 使用proxyFactory完成Aop功能
+		// COMMENT isen proxyFactory提供proxy对象，并将TransactionInterceptor设为target方法调用拦截器
 		ProxyFactory proxyFactory = new ProxyFactory();
 
 		if (this.preInterceptors != null) {
@@ -158,6 +161,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		}
 
 		// Add the main interceptor (typically an Advisor).
+		// COMMENT isen 加入事务通知器的地方
 		proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(createMainInterceptor()));
 
 		if (this.postInterceptors != null) {
@@ -168,9 +172,11 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 		proxyFactory.copyFrom(this);
 
+		// COMMENT isen 创建并设置目标源
 		TargetSource targetSource = createTargetSource(this.target);
 		proxyFactory.setTargetSource(targetSource);
 
+		// COMMENT isen 设置代理的接口
 		if (this.proxyInterfaces != null) {
 			proxyFactory.setInterfaces(this.proxyInterfaces);
 		}
@@ -184,6 +190,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 		postProcessProxyFactory(proxyFactory);
 
+		// COMMENT isen 设置代理对象
 		this.proxy = proxyFactory.getProxy(this.proxyClassLoader);
 	}
 

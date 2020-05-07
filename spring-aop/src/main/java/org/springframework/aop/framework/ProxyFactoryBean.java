@@ -102,6 +102,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	// COMMENT isen 通知器名称
 	@Nullable
 	private String[] interceptorNames;
 
@@ -249,8 +250,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	@Override
 	@Nullable
 	public Object getObject() throws BeansException {
+		// COMMENT isen 初始化通知器链
 		initializeAdvisorChain();
 		if (isSingleton()) {
+			// COMMENT isen 单例
 			return getSingletonInstance();
 		}
 		else {
@@ -258,6 +261,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				logger.info("Using non-singleton proxies with singleton targets is often undesirable. " +
 						"Enable prototype proxies by setting the 'targetName' property.");
 			}
+			// COMMENT isen 原型
 			return newPrototypeInstance();
 		}
 	}
@@ -323,10 +327,12 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				if (targetClass == null) {
 					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
 				}
+				// COMMENT isen 设置代理对象的接口
 				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.proxyClassLoader));
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
+			// COMMENT isen 使用AopProxyFactory来生成AopProxy（cgLibProxy\jdkProxy）,然后通过apoProxy获取proxy
 			this.singletonInstance = getProxy(createAopProxy());
 		}
 		return this.singletonInstance;
@@ -454,6 +460,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				}
 
 				if (name.endsWith(GLOBAL_SUFFIX)) {
+					// COMMENT isen 全局通知器
 					if (!(this.beanFactory instanceof ListableBeanFactory)) {
 						throw new AopConfigException(
 								"Can only use global advisors or interceptors with a ListableBeanFactory");

@@ -281,6 +281,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	@SuppressWarnings("unchecked")
 	private void processKeyedProperty(PropertyTokenHolder tokens, PropertyValue pv) {
+		// COMMENT isen 为bean设置依赖
 		Object propValue = getPropertyHoldingValue(tokens);
 		PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
 		if (ph == null) {
@@ -291,6 +292,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		String lastKey = tokens.keys[tokens.keys.length - 1];
 
 		if (propValue.getClass().isArray()) {
+			// COMMENT isen 对Array进行注入
 			Class<?> requiredType = propValue.getClass().getComponentType();
 			int arrayIndex = Integer.parseInt(lastKey);
 			Object oldValue = null;
@@ -380,6 +382,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	private Object getPropertyHoldingValue(PropertyTokenHolder tokens) {
 		// Apply indexes and map keys: fetch value for all keys but the last one.
+		// COMMENT isen 设置tokens的索引和keys
 		Assert.state(tokens.keys != null, "No token keys");
 		PropertyTokenHolder getterTokens = new PropertyTokenHolder(tokens.actualName);
 		getterTokens.canonicalName = tokens.canonicalName;
@@ -388,6 +391,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		Object propValue;
 		try {
+			// COMMENT isen 获取bean中对注入对象的引用，比如Array、List、Map、Set等
 			propValue = getPropertyValue(getterTokens);
 		}
 		catch (NotReadablePropertyException ex) {

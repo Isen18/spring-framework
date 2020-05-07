@@ -518,6 +518,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+			// COMMENT isen 容器初始化，为容器做一些准备工作，设置类加载器，BeanPostProcessor等
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -567,7 +568,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			finally {
 				// Reset common introspection caches in Spring's core, since we
-				// might not ever need metadata for singleton beans anymore...
+				//				// might not ever need metadata for singleton beans anymore...
 				resetCommonCaches();
 			}
 		}
@@ -635,6 +636,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
+		// COMMENT isen 容器PostProcessor
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
@@ -860,6 +862,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		// COMMENT isen 初始化非延迟单例bean
 		beanFactory.preInstantiateSingletons();
 	}
 
@@ -982,6 +985,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #registerShutdownHook()
 	 */
 	protected void doClose() {
+		// COMMENT isen 销毁bean，关闭容器
 		if (this.active.get() && this.closed.compareAndSet(false, true)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this);
@@ -991,6 +995,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			try {
 				// Publish shutdown event.
+				// COMMENT isen 发布容器关闭事件
 				publishEvent(new ContextClosedEvent(this));
 			}
 			catch (Throwable ex) {
@@ -1008,6 +1013,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Destroy all cached singletons in the context's BeanFactory.
+			// COMMENT isen 销毁bean
 			destroyBeans();
 
 			// Close the state of this context itself.

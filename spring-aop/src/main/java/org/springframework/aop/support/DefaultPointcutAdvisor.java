@@ -58,6 +58,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 		this(Pointcut.TRUE, advice);
 	}
 
+
 	/**
 	 * Create a DefaultPointcutAdvisor, specifying Pointcut and Advice.
 	 * @param pointcut the Pointcut targeting the Advice
@@ -67,7 +68,6 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 		this.pointcut = pointcut;
 		setAdvice(advice);
 	}
-
 
 	/**
 	 * Specify the pointcut targeting the advice.

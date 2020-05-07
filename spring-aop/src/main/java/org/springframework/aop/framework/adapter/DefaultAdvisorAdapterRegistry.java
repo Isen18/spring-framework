@@ -47,6 +47,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	 * Create a new DefaultAdvisorAdapterRegistry, registering well-known adapters.
 	 */
 	public DefaultAdvisorAdapterRegistry() {
+		// COMMENT isen 注册几个主要通知的适配器
 		registerAdvisorAdapter(new MethodBeforeAdviceAdapter());
 		registerAdvisorAdapter(new AfterReturningAdviceAdapter());
 		registerAdvisorAdapter(new ThrowsAdviceAdapter());
@@ -79,9 +80,12 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
 		Advice advice = advisor.getAdvice();
+		// COMMENT isen 将所有的通知适配到MethodInterceptor，即环绕通知，换言之，就是将不同的通知转换成不同的拦截器实现（MethodInterceptor实现类）
 		if (advice instanceof MethodInterceptor) {
+			// COMMENT isen 不需要适配
 			interceptors.add((MethodInterceptor) advice);
 		}
+		// COMMENT isen 进行适配
 		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {
 				interceptors.add(adapter.getInterceptor(advisor));

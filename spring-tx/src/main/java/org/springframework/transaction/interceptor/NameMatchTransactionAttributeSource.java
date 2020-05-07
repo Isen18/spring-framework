@@ -50,6 +50,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	protected static final Log logger = LogFactory.getLog(NameMatchTransactionAttributeSource.class);
 
 	/** Keys are method names; values are TransactionAttributes. */
+	// COMMENT isen 存储方法名-》事务属性
 	private Map<String, TransactionAttribute> nameMap = new HashMap<>();
 
 
@@ -72,6 +73,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
 	public void setProperties(Properties transactionAttributes) {
+		// COMMENT isen 从Properties中获取事务属性
 		TransactionAttributeEditor tae = new TransactionAttributeEditor();
 		Enumeration<?> propNames = transactionAttributes.propertyNames();
 		while (propNames.hasMoreElements()) {
@@ -98,6 +100,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 
+	// COMMENT isen 获取方法的事务属性
 	@Override
 	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
@@ -106,11 +109,13 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		}
 
 		// Look for direct name match.
+		// COMMENT isen 直接匹配
 		String methodName = method.getName();
 		TransactionAttribute attr = this.nameMap.get(methodName);
 
 		if (attr == null) {
 			// Look for most specific name match.
+			// COMMENT isen 通过模式匹配，比如存在通配符 *
 			String bestNameMatch = null;
 			for (String mappedName : this.nameMap.keySet()) {
 				if (isMatch(methodName, mappedName) &&

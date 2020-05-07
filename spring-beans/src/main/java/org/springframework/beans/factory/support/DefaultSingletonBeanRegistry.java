@@ -501,6 +501,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
 		}
 		for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
+			// COMMENT isen
 			destroySingleton(disposableBeanNames[i]);
 		}
 
@@ -540,6 +541,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.disposableBeans) {
 			disposableBean = (DisposableBean) this.disposableBeans.remove(beanName);
 		}
+		// COMMENT isen 销毁bean
 		destroyBean(beanName, disposableBean);
 	}
 
@@ -568,6 +570,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		// Actually destroy the bean now...
 		if (bean != null) {
 			try {
+				// COMMENT isen 销毁bean
 				bean.destroy();
 			}
 			catch (Throwable ex) {
