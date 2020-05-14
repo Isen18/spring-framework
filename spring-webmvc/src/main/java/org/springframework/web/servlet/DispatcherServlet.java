@@ -1026,8 +1026,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				// COMMENT isen 2019/1/8 如果是上传请求，就将request转为MultipartHttpServletRequest，使用了multipartResolver
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
-				// Determine handler for the current request.
-				// COMMENT isen 2019/1/8 根据request获取HandlerExecutionChain(包括拦截器和handler(目标方法))
+				// Determine handler for the current request.截器和handler(目标方
+				// COMMENT isen 2019/1/8 根据request获取HandlerExecutionChain(包括拦法))
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);

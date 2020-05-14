@@ -139,6 +139,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 		super(parent);
 		setConfigLocations(configLocations);
 		if (refresh) {
+			// COMMENT isen 开始ioc容器的初始化
 			refresh();
 		}
 	}
