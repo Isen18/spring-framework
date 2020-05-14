@@ -22,6 +22,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
+// COMMENT isen 实现类似ProxyFactoryBean,只是是编程式的完成aop的配置
 /**
  * Factory for AOP proxies for programmatic use, rather than via declarative
  * setup in a bean factory. This class provides a simple way of obtaining

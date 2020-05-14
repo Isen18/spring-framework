@@ -107,6 +107,7 @@ class BeanDefinitionValueResolver {
 		// to another bean to be resolved.
 		if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			// COMMENT isen 解析依赖的引用
 			return resolveReference(argName, ref);
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
@@ -132,6 +133,7 @@ class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof ManagedArray) {
 			// May need to resolve contained runtime references.
+			// COMMENT isen 解析数组
 			ManagedArray array = (ManagedArray) value;
 			Class<?> elementType = array.resolvedElementType;
 			if (elementType == null) {
@@ -352,9 +354,11 @@ class BeanDefinitionValueResolver {
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
 			Object bean;
+			// COMMENT isen RuntimeBeanReference实在载入BeanDefinition时根据配置生成的
 			String refName = ref.getBeanName();
 			refName = String.valueOf(doEvaluate(refName));
 			if (ref.isToParent()) {
+				// COMMENT isen ref在双亲IOC容器中，则到双亲IOC容器中获取
 				if (this.beanFactory.getParentBeanFactory() == null) {
 					throw new BeanCreationException(
 							this.beanDefinition.getResourceDescription(), this.beanName,
@@ -364,6 +368,7 @@ class BeanDefinitionValueResolver {
 				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
 			}
 			else {
+				// COMMENT isen 在当前IOC容器中获取bean，这里或触发一次getBean过程，如果依赖注入时没有发生，则会触发依赖注入
 				bean = this.beanFactory.getBean(refName);
 				this.beanFactory.registerDependentBean(refName, this.beanName);
 			}

@@ -235,6 +235,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	@Override
 	public void destroy() {
+		// COMMENT isen 销毁bean
 		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
@@ -280,6 +281,13 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 
 	@Nullable
+	private Method findDestroyMethod(String name) {
+		return (this.nonPublicAccessAllowed ?
+				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), name) :
+				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass().getMethods(), name));
+	}
+
+	@Nullable
 	private Method determineDestroyMethod(String name) {
 		try {
 			if (System.getSecurityManager() != null) {
@@ -295,12 +303,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 	}
 
-	@Nullable
-	private Method findDestroyMethod(String name) {
-		return (this.nonPublicAccessAllowed ?
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), name) :
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass().getMethods(), name));
-	}
 
 	/**
 	 * Invoke the specified custom destroy method on the given bean.
@@ -326,7 +328,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				});
 				try {
 					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-						destroyMethod.invoke(this.bean, args), this.acc);
+							destroyMethod.invoke(this.bean, args), this.acc);
 				}
 				catch (PrivilegedActionException pax) {
 					throw (InvocationTargetException) pax.getException();
@@ -352,7 +354,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					"' on bean with name '" + this.beanName + "'", ex);
 		}
 	}
-
 
 	/**
 	 * Serializes a copy of the state of this class,

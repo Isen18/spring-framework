@@ -40,7 +40,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 		implements BeanNameAware, InitializingBean {
 
 	@Nullable
-	private String[] configLocations;
+	private String[]  configLocations;
 
 	private boolean setIdCalled = false;
 

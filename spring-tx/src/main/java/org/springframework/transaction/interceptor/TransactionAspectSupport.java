@@ -277,35 +277,46 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@Nullable
 	protected Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass,
 			final InvocationCallback invocation) throws Throwable {
-
+		// COMMENT isen 这个方法完成事务的模板方法，创建、提交、回滚
 		// If the transaction attribute is null, the method is non-transactional.
+		// COMMENT isen 获取事务属性
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
+		// COMMENT isen 获取事务管理器
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
+		// COMMENT isen PlatformTransactionManager分为两种：
+		// COMMENT isen 1. CallbackPreferringPlatformTransactionManager，需要回调完成事务的创建和提交
+		// COMMENT isen 2. 非CallbackPreferringPlatformTransactionManager，不需要回调就可以完成事务的创建和提交，例如DataSourceTransactionManager
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			// COMMENT isen 如果有必要，则创建事务，TransactionInfo保存了事务管理器、事务属性、事务状态等信息
 			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
 			Object retVal = null;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
+				// COMMENT isen 沿着拦截器链进行，使得目标对象的方法得到调用
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
+				// COMMENT isen 处理事务过程中的异常
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
+				// COMMENT isen 重置线程中的old TransactionInfo
 				cleanupTransactionInfo(txInfo);
 			}
+			// COMMENT isen 通过事务管理器提交事务
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
 
 		else {
+			// COMMENT isen 采用回调的方法使用事务管理器
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
@@ -318,6 +329,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					catch (Throwable ex) {
 						if (txAttr.rollbackOn(ex)) {
 							// A RuntimeException: will lead to a rollback.
+							// COMMENT isen RuntimeException导致事务回滚
 							if (ex instanceof RuntimeException) {
 								throw (RuntimeException) ex;
 							}
@@ -327,11 +339,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						}
 						else {
 							// A normal return value: will lead to a commit.
+							// COMMENT isen 返回null，导致事务提交
 							throwableHolder.throwable = ex;
 							return null;
 						}
 					}
 					finally {
+						// COMMENT isen 重置线程中的old TransactionInfo
 						cleanupTransactionInfo(txInfo);
 					}
 				});
@@ -480,6 +494,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+		// COMMENT isen 构造TransactionInfo，并将其放到线程上下文中
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 
@@ -516,6 +531,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// We always bind the TransactionInfo to the thread, even if we didn't create
 		// a new transaction here. This guarantees that the TransactionInfo stack
 		// will be managed correctly even if no transaction was created by this aspect.
+		// COMMENT isen 将transactionInfo绑定到线程上下文
 		txInfo.bindToThread();
 		return txInfo;
 	}

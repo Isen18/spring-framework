@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
+	// COMMENT isen interceptor和pointcut
 	@Nullable
 	private TransactionInterceptor transactionInterceptor;
 

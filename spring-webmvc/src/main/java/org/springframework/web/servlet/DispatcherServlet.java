@@ -862,6 +862,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		String key = strategyInterface.getName();
 		// COMMENT isen 2019/1/8 获取所有的默认策略
 		String value = defaultStrategies.getProperty(key);
+		// TODO
 		if (value != null) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 			List<T> strategies = new ArrayList<>(classNames.length);

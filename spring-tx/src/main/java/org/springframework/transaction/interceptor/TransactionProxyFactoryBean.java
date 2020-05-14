@@ -115,6 +115,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements BeanFactoryAware {
 
+	// COMMENT isen 这个拦截器通过AOP发挥作用，通过这个拦截器，spring封装了事务实现
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
 	@Nullable
@@ -126,6 +127,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	 * transaction management: This class is just a way of invoking it.
 	 * @see TransactionInterceptor#setTransactionManager
 	 */
+	// COMMENT isen 注入PlatformTransactionManager
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionInterceptor.setTransactionManager(transactionManager);
 	}
@@ -143,6 +145,8 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	 * @see TransactionAttributeEditor
 	 * @see NameMatchTransactionAttributeSource
 	 */
+	// COMMENT isen 通过依赖注入的事务属性以Properties形式出现
+	// COMMENT isen 把从BeanDefinition中读到的事务管理的属性信息注入到TransactionInterceptor
 	public void setTransactionAttributes(Properties transactionAttributes) {
 		this.transactionInterceptor.setTransactionAttributes(transactionAttributes);
 	}
@@ -189,14 +193,17 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	/**
 	 * Creates an advisor for this FactoryBean's TransactionInterceptor.
 	 */
+	// COMMENT isen 创建Spring Aop对事务处理的Advisor
 	@Override
 	protected Object createMainInterceptor() {
 		this.transactionInterceptor.afterPropertiesSet();
 		if (this.pointcut != null) {
+			// COMMENT isen 使用默认的通知器DefaultPointcutAdvisor
 			return new DefaultPointcutAdvisor(this.pointcut, this.transactionInterceptor);
 		}
 		else {
 			// Rely on default pointcut.
+			// COMMENT isen 如果没有配置pointcut，使用TransactionAttributeSourceAdvisor作为通知器
 			return new TransactionAttributeSourceAdvisor(this.transactionInterceptor);
 		}
 	}
